@@ -23,5 +23,5 @@
                 android:resource="@xml/authenticator" />
         </service>
     </application>
-
+<!--afasdf-->
 </manifest>
