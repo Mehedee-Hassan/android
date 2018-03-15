@@ -24,8 +24,7 @@
     android:filterTouchesWhenObscured="true"
     android:orientation="vertical" >
 
-    <include
-        layout="@layout/toolbar_standard" />
+    <include  layout="@layout/toolbar_standard" />
 
     <fragment
         android:id="@+id/local_files_list"
