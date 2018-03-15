@@ -25,7 +25,7 @@
     android:orientation="vertical"
     android:background="#fff"
     android:paddingLeft="@dimen/standard_padding"
-    tools:context=".ui.activity.FileDisplayActivity"
+    tools:context="com.wecloud.android.ui.activity.FileDisplayActivity"
     android:filterTouchesWhenObscured="true"
     >
 

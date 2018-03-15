@@ -25,7 +25,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".ui.preview.PreviewAudioFragment"
+    tools:context="com.wecloud.android.ui.preview.PreviewAudioFragment"
     android:filterTouchesWhenObscured="true">
 
     <FrameLayout
@@ -47,7 +47,7 @@
 
     </FrameLayout>
 
-    <com.owncloud.android.media.MediaControlView
+    <com.wecloud.android.media.MediaControlView
         android:id="@id/media_controller"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

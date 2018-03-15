@@ -38,6 +38,7 @@ import android.test.suitebuilder.annotation.LargeTest;
 import com.owncloud.android.R;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.utils.AccountsManager;
+import com.wecloud.android.authentication.AuthenticatorActivity;
 
 import org.junit.After;
 import org.junit.Before;

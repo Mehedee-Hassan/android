@@ -23,7 +23,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
-    tools:context=".ui.preview.PreviewAudioFragment"
+    tools:context="com.wecloud.android.ui.preview.PreviewAudioFragment"
     android:filterTouchesWhenObscured="true"
     >
 

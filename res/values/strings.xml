@@ -56,7 +56,7 @@
     <string name="auth_password">Password</string>
     <string name="auth_register">New to %1$s?</string>
     <string name="sync_string_files">Files</string>
-    <string name="setup_btn_connect">Connect</string>
+    <string name="setup_btn_connect">Login</string>
     <string name="uploader_btn_upload_text">Upload</string>
     <string name="uploader_top_message">Choose upload folder</string>
     <string name="uploader_wrn_no_account_title">No account found</string>
@@ -211,7 +211,7 @@
     <string name="auth_no_net_conn_title">No network connection</string>
     <string name="auth_nossl_plain_ok_title">Secure connection unavailable.</string>
     <string name="auth_connection_established">Connection established</string>
-    <string name="auth_testing_connection">Testing connection</string>
+    <string name="auth_testing_connection">Connecting..</string>
     <string name="auth_not_configured_title">Malformed server configuration</string>
     <string name="auth_account_not_new">An account for the same user and server already exists in the device</string>
     <string name="auth_account_not_the_same">The entered user does not match the user of this account</string>
@@ -221,7 +221,7 @@
     <string name="auth_ssl_general_error_title">SSL initialization failed</string>
     <string name="auth_bad_oc_version_title">Unrecognized server version</string>
     <string name="auth_wrong_connection_title">Couldn\'t establish connection</string>
-    <string name="auth_secure_connection">Secure connection established</string>
+    <string name="auth_secure_connection">Connected</string>
     <string name="auth_unauthorized">Wrong username or password</string>
     <string name="auth_oauth_error">Unsuccessful authorization</string>
     <string name="auth_oauth_error_access_denied">Access denied by authorization server</string>
@@ -517,6 +517,15 @@
     <string name="media_service_notification_channel_description">See music player</string>
     <string name="file_sync_notification_channel_name">File sync</string>
     <string name="file_sync_notification_channel_description">See file sync result</string>
+
+        <!--all we api-->
+    <string name="url_verify_device">http://aamracloud.com/apps/aamracloudapi/verify_device.php</string>
+    <string name="url_validate_username">http://aamracloud.com/apps/aamracloudapi/validate_username.php</string>
+    <string name="url_verify_phone">http://aamracloud.com/apps/aamracloudapi/verify_phone.php</string>
+    <string name="url_aamracloud_add_user">http://aamracloud.com/apps/aamracloudapi/newuser_1.php</string>
+    <string name="url_reset_password">http://aamracloud.com/apps/aamracloudapi/reset_password.php</string>
+
+
     <plurals name="items_selected_count">
         <item quantity="one">%d selected</item>
         <item quantity="other">%d selected</item>

@@ -32,7 +32,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000000"
-    tools:context=".ui.preview.PreviewImageFragment"
+    tools:context="com.wecloud.android.ui.preview.PreviewImageFragment"
     android:filterTouchesWhenObscured="true"
     >
 

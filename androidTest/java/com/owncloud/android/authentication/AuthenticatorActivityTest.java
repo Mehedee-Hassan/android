@@ -38,6 +38,7 @@ import com.owncloud.android.R;
 import com.owncloud.android.lib.common.utils.Log_OC;
 import com.owncloud.android.utils.AccountsManager;
 import com.owncloud.android.utils.ServerType;
+import com.wecloud.android.authentication.AuthenticatorActivity;
 
 import org.junit.After;
 import org.junit.Before;

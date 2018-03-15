@@ -52,6 +52,7 @@ import com.owncloud.android.lib.resources.status.OCCapability;
 import com.owncloud.android.utils.AccountsManager;
 import com.owncloud.android.utils.FileManager;
 import com.owncloud.android.utils.ServerType;
+import com.wecloud.android.ui.activity.FileDisplayActivity;
 
 import org.hamcrest.Matcher;
 import org.junit.After;
