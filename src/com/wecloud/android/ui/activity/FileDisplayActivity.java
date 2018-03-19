@@ -1816,6 +1816,8 @@ public class FileDisplayActivity extends HookActivity
             startPlaybackPosition,
             true
         );
+
+
         setSecondFragment(mediaFragment);
         updateFragmentsVisibility(true);
         updateActionBarTitleAndHomeButton(file);
