@@ -30,6 +30,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -66,8 +67,7 @@ public class UploadFilesActivity extends FileActivity implements
     public static final int RESULT_OK_AND_MOVE = RESULT_FIRST_USER; 
     
     private static final String KEY_DIRECTORY_PATH =
-            UploadFilesActivity.class.getCanonicalName() + ".KEY_DIRECTORY_PATH"
-    ;
+            UploadFilesActivity.class.getCanonicalName() + ".KEY_DIRECTORY_PATH";
 
     private static final String WAIT_DIALOG_TAG = "WAIT";
     private static final String QUERY_TO_MOVE_DIALOG_TAG = "QUERY_TO_MOVE";
@@ -356,6 +356,7 @@ public class UploadFilesActivity extends FileActivity implements
         @Override
         protected Boolean doInBackground(Void... params) {
             String[] checkedFilePaths = mFileListFragment.getCheckedFilePaths();
+            Log.e("File>>",checkedFilePaths.toString()+"");
             long total = 0;
             for (int i=0; checkedFilePaths != null && i < checkedFilePaths.length ; i++) {
                 String localPath = checkedFilePaths[i];
@@ -382,7 +383,7 @@ public class UploadFilesActivity extends FileActivity implements
                 // return the list of selected files (success)
                 Intent data = new Intent();
                 data.putExtra(EXTRA_CHOSEN_FILES, mFileListFragment.getCheckedFilePaths());
-
+                Log.e("File>>",mFileListFragment.toString()+"");
                 SharedPreferences.Editor appPreferencesEditor = PreferenceManager
                         .getDefaultSharedPreferences(getApplicationContext()).edit();
 

@@ -35,24 +35,39 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.SyncRequest;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources.NotFoundException;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wecloud.android.MainApp;
 import com.owncloud.android.R;
@@ -80,6 +95,8 @@ import com.wecloud.android.operations.UploadFileOperation;
 import com.wecloud.android.operations.common.SyncOperation;
 import com.wecloud.android.services.observer.FileObserverService;
 import com.wecloud.android.syncadapter.FileSyncAdapter;
+import com.wecloud.android.ui.dialog.ConfirmationDialogFragment;
+import com.wecloud.android.ui.dialog.LoadingDialog;
 import com.wecloud.android.ui.errorhandling.ErrorMessageAdapter;
 import com.wecloud.android.ui.fragment.FileDetailFragment;
 import com.wecloud.android.ui.fragment.FileFragment;
@@ -94,9 +111,12 @@ import com.wecloud.android.ui.preview.PreviewVideoActivity;
 import com.wecloud.android.ui.preview.PreviewVideoFragment;
 import com.wecloud.android.utils.DisplayUtils;
 import com.wecloud.android.utils.Extras;
+import com.wecloud.android.utils.FileStorageUtils;
 import com.wecloud.android.utils.PermissionUtil;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,7 +133,7 @@ public class FileDisplayActivity extends HookActivity
     private UploadBroadcastReceiver mUploadBroadcastReceiver;
     private DownloadBroadcastReceiver mDownloadBroadcastReceiver;
     private RemoteOperationResult mLastSslUntrustedServerResult = null;
-
+    String storage_path;
     private boolean mDualPane;
     private View mLeftFragmentContainer;
     private View mRightFragmentContainer;
@@ -141,8 +161,24 @@ public class FileDisplayActivity extends HookActivity
     private OCFile mWaitingToSend;
 
     private LocalBroadcastManager mLocalBroadcastManager;
-
+    Context context;
     private IndexedForest<FileDisplayActivity> mPendingCameraUploads = new IndexedForest<>();
+
+    // for uploading contact
+
+    private Account mAccountOnCreation;
+    public static final String EXTRA_CHOSEN_FILES =
+            UploadFilesActivity.class.getCanonicalName() + ".EXTRA_CHOSEN_FILES";
+    public static final int RESULT_OK_AND_MOVE = RESULT_FIRST_USER;
+    private static final String QUERY_TO_MOVE_DIALOG_TAG = "QUERY_TO_MOVE";
+
+
+
+    // Backup Contact
+    Cursor cursor;
+    String vfile;
+    ArrayList<String> numberLists ;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +209,9 @@ public class FileDisplayActivity extends HookActivity
             mWaitingToSend = null;
         }
 
+        // uploading contact backup
+        mAccountOnCreation = getAccount();
+
         /// USER INTERFACE
 
         // Inflate and set the layout view
@@ -183,7 +222,7 @@ public class FileDisplayActivity extends HookActivity
 
         // setup drawer
         setupDrawer(R.id.nav_all_files);
-
+        context = this;
         mDualPane = getResources().getBoolean(R.bool.large_land_layout);
         mLeftFragmentContainer = findViewById(R.id.left_fragment_container);
         mRightFragmentContainer = findViewById(R.id.right_fragment_container);
@@ -201,7 +240,71 @@ public class FileDisplayActivity extends HookActivity
                     .add(taskRetainerFragment, TaskRetainerFragment.FTAG_TASK_RETAINER_FRAGMENT).commit();
         }   // else, Fragment already created and retained across configuration change
 
-        Log_OC.v(TAG, "onCreate() end");
+        //Contact Backup
+        vfile = "myContacts" + "_"+".vcf";
+        getPermission();
+
+    }
+
+    private void getPermission() {
+
+        String[] permissionArrays = new String[]{Manifest.permission.READ_CONTACTS,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(permissionArrays, 1);
+        } else {
+            // if already permition granted
+            getVcardString();
+        }
+    }
+
+    private void getVcardString() {
+        // TODO Auto-generated method stub
+        numberLists = new ArrayList<String>();
+        cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+        if(cursor!=null&&cursor.getCount()>0)
+        {
+            cursor.moveToFirst();
+            String Phone_number=cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+            Log.d("TAG", "Phone_number>>> "+Phone_number+"VcF String is");
+            for(int i =0;i<cursor.getCount();i++)
+            {
+                get(cursor);
+                cursor.moveToNext();
+            }
+        }
+        else
+        {
+            Log.d("TAG", "No Contacts in Your Phone");
+        }
+    }
+
+    public void get(Cursor cursor)
+    {
+        String lookupKey = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.LOOKUP_KEY));
+        Uri uri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_VCARD_URI, lookupKey);
+        AssetFileDescriptor fd;
+        try {
+
+            fd = this.getContentResolver().openAssetFileDescriptor(uri, "r");
+
+            FileInputStream fis = fd.createInputStream();
+            byte[] buf = new byte[(int) fd.getDeclaredLength()];
+            fis.read(buf);
+            String vcardstring= new String(buf);
+            numberLists.add(vcardstring);
+
+             storage_path = Environment.getExternalStorageDirectory().toString() + File.separator + vfile;
+            FileOutputStream mFileOutputStream = new FileOutputStream(storage_path, false);
+            mFileOutputStream.write(vcardstring.toString().getBytes());
+
+      new CheckAvailableSpaceTask().execute();
+
+        } catch (Exception e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
     }
 
     @Override
@@ -218,7 +321,7 @@ public class FileDisplayActivity extends HookActivity
                         .setAction(R.string.common_ok, new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                PermissionUtil.requestWriteExternalStoreagePermission(FileDisplayActivity.this);
+                            PermissionUtil.requestWriteExternalStoreagePermission(FileDisplayActivity.this);
                             }
                         });
 
@@ -244,13 +347,21 @@ public class FileDisplayActivity extends HookActivity
         switch (requestCode) {
             case PermissionUtil.PERMISSIONS_WRITE_EXTERNAL_STORAGE: {
                 // If request is cancelled, result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0  && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted
                     startSyncFolderOperation(getFile(), false);
                 } else {
                     // permission denied --> do nothing
                 }
+
+
+                if (grantResults.length>0&&grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                  //  Toast.makeText(context, "permission grant", Toast.LENGTH_SHORT).show();
+                    getVcardString();
+                }else{
+
+                }
+
                 return;
             }
         }
@@ -348,6 +459,7 @@ public class FileDisplayActivity extends HookActivity
 
             /// Second fragment
             OCFile file = getFile();
+
             Fragment secondFragment = chooseInitialSecondFragment(file);
             if (secondFragment != null) {
                 setSecondFragment(secondFragment);
@@ -1736,6 +1848,28 @@ public class FileDisplayActivity extends HookActivity
      * @param file Text {@link OCFile} to preview.
      */
     public void startTextPreview(OCFile file) {
+
+
+        String filename = file.getFileName();
+        String filenameArray[] = filename.split("\\.");
+        String extension = filenameArray[filenameArray.length-1];
+
+        if(extension.equals("vcf") || extension.equals("VCF")){
+
+            Toast.makeText(context, "vcf file " + filename , Toast.LENGTH_SHORT).show();
+
+            Intent intent  = new Intent("com.android.contacts");
+            intent.setAction(Intent.ACTION_VIEW);
+            intent.setType("text/x-vcard");
+            Uri uri = file.getStorageUri();
+            intent.setDataAndType(uri,"text/x-vcard");
+            startActivity(intent);
+
+
+            return;
+
+        }
+
         Fragment textPreviewFragment = PreviewTextFragment.newInstance(
             file,
             getAccount()
@@ -1754,6 +1888,8 @@ public class FileDisplayActivity extends HookActivity
      * @param file {@link OCFile} to sync and open.
      */
     public void startSyncThenOpen(OCFile file) {
+
+        Log.d(TAG, "startSyncThenOpen: "+" **");
         FileDetailFragment detailFragment = FileDetailFragment.newInstance(file, getAccount());
         setSecondFragment(detailFragment);
         mFileWaitingToPreview = file;
@@ -1849,4 +1985,78 @@ public class FileDisplayActivity extends HookActivity
     public void allFilesOption() {
         browseToRoot();
     }
+
+
+    private class CheckAvailableSpaceTask extends AsyncTask<Void, Void, Boolean> {
+
+        /**
+         * Updates the UI before trying the movement
+         */
+        @Override
+        protected void onPreExecute () {
+            /// progress dialog and disable 'Move' button
+//           mCurrentDialog = LoadingDialog.newInstance(R.string.wait_a_moment, false);
+//            mCurrentDialog.show(getSupportFragmentManager(), "Wait");
+        }
+
+
+        /**
+         * Checks the available space
+         *
+         * @return     'True' if there is space enough.
+         */
+        @Override
+        protected Boolean doInBackground(Void... params) {
+
+            long total = 0;
+
+                String localPath =storage_path;
+                File localFile = new File(localPath);
+                total += localFile.length();
+
+            return (new Boolean(FileStorageUtils.getUsableSpace(mAccountOnCreation.name) >= total));
+        }
+
+        /**
+         * Updates the activity UI after the check of space is done.
+         *
+         * If there is not space enough. shows a new dialog to query the user if wants to move the
+         * files instead of copy them.
+         *
+         * @param result        'True' when there is space enough to copy all the selected files.
+         */
+        @Override
+        protected void onPostExecute(Boolean result) {
+//            mCurrentDialog.dismiss();
+//            mCurrentDialog = null;
+
+            if (result) {
+                // return the list of selected files (success)
+                Intent data = new Intent();
+                data.putExtra(EXTRA_CHOSEN_FILES, storage_path);
+
+                SharedPreferences.Editor appPreferencesEditor = PreferenceManager
+                        .getDefaultSharedPreferences(getApplicationContext()).edit();
+
+                    setResult(RESULT_OK_AND_MOVE, data);
+                    appPreferencesEditor.putInt("prefs_uploader_behaviour",
+                            FileUploader.LOCAL_BEHAVIOUR_MOVE);
+
+                appPreferencesEditor.apply();
+
+            } else {
+                // show a dialog to query the user if wants to move the selected files
+                // to the ownCloud folder instead of copying
+                String[] args = {getString(R.string.app_name)};
+                ConfirmationDialogFragment dialog = ConfirmationDialogFragment.newInstance(
+                        R.string.upload_query_move_foreign_files, args, 0, R.string.common_yes, -1,
+                        R.string.common_no
+                );
+                //dialog.setOnConfirmationListener(this);
+
+                dialog.show(getSupportFragmentManager(), QUERY_TO_MOVE_DIALOG_TAG);
+            }
+        }
+    }
+
 }

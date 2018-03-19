@@ -91,9 +91,9 @@ public class PreviewImageActivity extends FileActivity implements
         setContentView(R.layout.preview_image_activity);
 
         // ActionBar
-        ActionBar actionBar = getSupportActionBar();
-        updateActionBarTitleAndHomeButton(null);
-        actionBar.hide();
+//        ActionBar actionBar = getSupportActionBar();
+//        updateActionBarTitleAndHomeButton(null);
+//        actionBar.hide();
 
 
         /// FullScreen and Immersive Mode
@@ -111,7 +111,7 @@ public class PreviewImageActivity extends FileActivity implements
                     actionBar.show();
                     setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 } else {
-                    actionBar.hide();
+//                    actionBar.hide();
                     setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 }
             }
@@ -182,7 +182,7 @@ public class PreviewImageActivity extends FileActivity implements
         @Override
         public void handleMessage(Message msg) {
             hideSystemUI(mFullScreenAnchorView);
-            getSupportActionBar().hide();
+         //   getSupportActionBar().hide();
         }
     };
     
@@ -338,7 +338,7 @@ public class PreviewImageActivity extends FileActivity implements
             mHasSavedPosition = true;
 
             OCFile currentFile = mPreviewImagePagerAdapter.getFileAt(position);
-            getSupportActionBar().setTitle(currentFile.getFileName());
+//            getSupportActionBar().setTitle(currentFile.getFileName());
             setDrawerIndicatorEnabled(false);
             if (!mPreviewImagePagerAdapter.pendingErrorAt(position)) {
                 getFileOperationsHelper().syncFile(currentFile);
@@ -446,7 +446,7 @@ public class PreviewImageActivity extends FileActivity implements
             if (file != null) {
                 /// Refresh the activity according to the Account and OCFile set
                 setFile(file);  // reset after getting it fresh from storageManager
-                getSupportActionBar().setTitle(getFile().getFileName());
+           //     getSupportActionBar().setTitle(getFile().getFileName());
                 initViewPager();
 
             } else {

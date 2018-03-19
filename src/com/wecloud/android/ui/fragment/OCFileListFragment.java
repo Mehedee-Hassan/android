@@ -31,6 +31,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -622,6 +623,9 @@ public class OCFileListFragment extends ExtendedListFragment {
 
     @Override
     public void onItemClick(AdapterView<?> l, View v, int position, long id) {
+        Log.d(TAG, "onItemClick: ** m");
+
+
         OCFile file = (OCFile) mAdapter.getItem(position);
         if (file != null) {
             if (file.isFolder()) {
@@ -637,19 +641,24 @@ public class OCFileListFragment extends ExtendedListFragment {
                 if (PreviewImageFragment.canBePreviewed(file)) {
                     // preview image - it handles the sync, if needed
                     ((FileDisplayActivity) mContainerActivity).startImagePreview(file);
+                    Log.d(TAG, "onItemClick: ** 1");
 
                 } else if (PreviewTextFragment.canBePreviewed(file)) {
                     ((FileDisplayActivity) mContainerActivity).startTextPreview(file);
                     mContainerActivity.getFileOperationsHelper().syncFile(file);
+                    Log.d(TAG, "onItemClick: ** 2" );
 
                 } else if (PreviewAudioFragment.canBePreviewed(file)) {
                     // media preview
                     ((FileDisplayActivity) mContainerActivity).startAudioPreview(file, 0);
                     mContainerActivity.getFileOperationsHelper().syncFile(file);
+                    Log.d(TAG, "onItemClick: ** 3");
 
                 } else if (PreviewVideoFragment.canBePreviewed(file) &&
                         !fileIsDownloading(file)) {
 
+                    Log.d(TAG, "onItemClick: ** 4");
+                    
                     // Available offline exception, don't initialize streaming
                     if (!file.isDown() && file.isAvailableOffline()) {
                         // sync file content, then open with external apps
@@ -665,6 +674,8 @@ public class OCFileListFragment extends ExtendedListFragment {
                         mContainerActivity.getFileOperationsHelper().syncFile(file);
                     }
                 } else {
+                    Log.d(TAG, "onItemClick: ** 5");
+
                     // sync file content, then open with external apps
                     ((FileDisplayActivity) mContainerActivity).startSyncThenOpen(file);
                 }

@@ -67,6 +67,12 @@
             android:orderInCategory="3"
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings"
-            android:title="@string/actionbar_settings"/>
+            android:title="@string/actionbar_settings"/><item
+
+
+            android:orderInCategory="3"
+            android:id="@+id/nav_settings_"
+            android:icon="@drawable/ic_settings"
+            android:title="New Menu"/>
     </group>
 </menu>

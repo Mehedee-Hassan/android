@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.StrictMode;
 
 import com.owncloud.android.BuildConfig;
 import com.owncloud.android.R;
@@ -70,6 +71,11 @@ public class MainApp extends Application {
         MainApp.mContext = getApplicationContext();
         
         boolean isSamlAuth = AUTH_ON.equals(getString(R.string.auth_method_saml_web_sso));
+
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+
 
         OwnCloudClientManagerFactory.setUserAgent(getUserAgent());
         if (isSamlAuth) {
